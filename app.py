@@ -12,8 +12,8 @@ import base64
 app=Flask(__name__)
 api=Api(app)
 
-# client=MongoClient('mongodb://localhost:27017/')
-client=MongoClient(s3)
+client=MongoClient("mongodb+srv://pulse-squad:pulse-squad@pulse.dlply.mongodb.net/Users?retryWrites=true&w=majority")
+# client=MongoClient(s3)
 db=client.Project1
 users=db['Users']
 
