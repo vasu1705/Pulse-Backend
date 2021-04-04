@@ -1,8 +1,8 @@
 from flask import Flask,jsonify,request
 from datetime import date, datetime
 import re,os
-from boto.s3.connection import S3Connection
-s3 = S3Connection(os.environ['MONGODB_URI'], os.environ['MONGODB_URI'])
+# from boto.s3.connection import S3Connection
+# s3 = S3Connection(os.environ['MONGODB_URI'], os.environ['MONGODB_URI'])
 
 from flask_restful import Resource,Api
 from pymongo import MongoClient
@@ -12,7 +12,7 @@ import base64
 app=Flask(__name__)
 api=Api(app)
 
-client=MongoClient("mongodb+srv://pulse-squad:pulse-squad@pulse.dlply.mongodb.net/Users?retryWrites=true&w=majority")
+client=MongoClient("mongodb+srv://pulse-squad:pulse-squad@pulse.dlply.mongodb.net/Project1?retryWrites=true&w=majority")
 # client=MongoClient(s3)
 db=client.Project1
 users=db['Users']
