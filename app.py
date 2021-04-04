@@ -1,9 +1,13 @@
 from flask import Flask,jsonify,request
 from datetime import date, datetime
-import re
+import re,os
+from boto.s3.connection import S3Connection
+s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
+print(s3)
 from flask_restful import Resource,Api
 from pymongo import MongoClient
 import base64
+
 
 app=Flask(__name__)
 api=Api(app)
