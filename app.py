@@ -52,11 +52,11 @@ def login_check(item):
 def home():
     return "Hello World"
 
-@app.route('/home/users',methods=['GET'])
-def hel():
+@app.route('/home/<name>',methods=['GET'])
+def hel(name):
     now=datetime.now()
     formatted_now=now.strftime("%A, %d %B, %Y at %X")
-    mat=re.match("[a-zA-Z]+")
+    mat=re.match("[a-zA-Z]+",name)
     if mat:
         clean_name=mat.group(0)
     else:
