@@ -2,7 +2,7 @@ from flask import Flask,jsonify,request
 from datetime import date, datetime
 import re,os
 from boto.s3.connection import S3Connection
-s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
+s3 = S3Connection(os.environ['MONGODB_URI'], os.environ['MONGODB_URI'])
 print(s3)
 from flask_restful import Resource,Api
 from pymongo import MongoClient
