@@ -3,7 +3,7 @@ from datetime import date, datetime
 import re,os
 from boto.s3.connection import S3Connection
 s3 = S3Connection(os.environ['MONGODB_URI'], os.environ['MONGODB_URI'])
-print(s3)
+
 from flask_restful import Resource,Api
 from pymongo import MongoClient
 import base64
@@ -12,7 +12,8 @@ import base64
 app=Flask(__name__)
 api=Api(app)
 
-client=MongoClient('mongodb://localhost:27017/')
+# client=MongoClient('mongodb://localhost:27017/')
+client=MongoClient(s3)
 db=client.Project1
 users=db['Users']
 
