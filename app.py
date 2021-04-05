@@ -1,21 +1,21 @@
-from flask import Flask,jsonify,request
+from flask import Flask, jsonify, request, render_template
 from datetime import date, datetime
-import re,os
-
-from flask_restful import Resource,Api
+import re, os
+from flask.helpers import send_file, send_from_directory
+from flask_restful import Resource, Api
 from pymongo import MongoClient
 import base64
 
 
-app=Flask(__name__)
-api=Api(app)
+app = Flask(__name__)
+app.config['DEBUG']= True
+api = Api(app)
 
 client=MongoClient("mongodb+srv://pulse-squad:pulse-squad@pulse.dlply.mongodb.net/Project1?retryWrites=true&w=majority")
-# client=MongoClient("localhost:27017")
 db=client.Project1
 users=db['Users']
 
-## USER defined functions for insertion and deletions from mongodb  ##
+# USER defined functions for insertion and deletions from mongodb  #
 
 def add(item):
     name=item['username']
@@ -48,12 +48,13 @@ def login_check(item):
         else:
             return False
 
-##              *********************                           ##
+'''                           *********************                             '''
 
 
 @app.route('/')
 def home():
-    return "Hello World"
+    return render_template('index.html')
+
 
 @app.route('/home/<name>',methods=['GET'])
 def hel(name):
@@ -88,6 +89,4 @@ def logincheck():
         return jsonify ({'Message':"Cannot identify User , Username or Password Don't Match",'status':300})
 
 if __name__=="__main__":
-    port=int(os.environ.get('PORT',5000))
-    app.run(host='0.0.0.0',port=port)
-
+    app.run(debug=True)
