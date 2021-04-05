@@ -1,8 +1,6 @@
 from flask import Flask,jsonify,request
 from datetime import date, datetime
 import re,os
-# from boto.s3.connection import S3Connection
-# s3 = S3Connection(os.environ['MONGODB_URI'], os.environ['MONGODB_URI'])
 
 from flask_restful import Resource,Api
 from pymongo import MongoClient
@@ -13,7 +11,7 @@ app=Flask(__name__)
 api=Api(app)
 
 client=MongoClient("mongodb+srv://pulse-squad:pulse-squad@pulse.dlply.mongodb.net/Project1?retryWrites=true&w=majority")
-# client=MongoClient(s3)
+# client=MongoClient("localhost:27017")
 db=client.Project1
 users=db['Users']
 
@@ -90,5 +88,6 @@ def logincheck():
         return jsonify ({'Message':"Cannot identify User , Username or Password Don't Match",'status':300})
 
 if __name__=="__main__":
-    app.run(debug=True)
+    port=int(os.environ.get('PORT',5000))
+    app.run(host='0.0.0.0',port=port)
 
