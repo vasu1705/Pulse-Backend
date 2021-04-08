@@ -37,7 +37,7 @@ def calc_prob(symptoms):
         X_test[index] = 1
         
     X_test = X_test.reshape(1,-1)
-    classifier = keras.models.load_model('symptoms_classifier')
+    classifier = keras.models.load_model('ML/symptoms_classifier')
     y_pred = classifier.predict(X_test)
     top_five_indexes = y_pred.argsort()[0, :][-5:][::-1]
     top_five = label_encoder.inverse_transform(top_five_indexes)
