@@ -125,7 +125,7 @@ def Examine():
         # cureent_user[user][1] -> Possible symtoms given
         # cureent_user[user][2] -> Main symtoms given
         #cureent_user[user][3] -> Questions symtoms given
-        if len(content['symptoms'])<2:return jsonify({"status":300,"Message":"Provide a Minimum of 2 sysmptoms"})
+        if len(content['symptoms'])<2:return jsonify({"status":300,"Message":"Provide a Minimum of 2 sysmptoms","content":current_users})
         symptoms=content['symptoms']
         current_users[user][0].extend(symptoms)
         current_users[user][1]=other_possible_symptoms(symptoms)
