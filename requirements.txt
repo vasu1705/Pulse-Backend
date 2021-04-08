@@ -3,3 +3,5 @@ flask-restful
 pymongo
 dnspython
 gunicorn
+flask_cors
+tensorflow-cpu
