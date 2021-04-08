@@ -16,17 +16,18 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense
 
-classifier = Sequential()
+# classifier = Sequential()
 
-classifier.add(Dense(units = 64, kernel_initializer = 'uniform', activation = 'relu', input_dim = 132))
+# classifier.add(Dense(units = 64, kernel_initializer = 'uniform', activation = 'relu', input_dim = 132))
 
-classifier.add(Dense(units = 41, kernel_initializer = 'uniform', activation = 'softmax'))
+# classifier.add(Dense(units = 41, kernel_initializer = 'uniform', activation = 'softmax'))
 
-classifier.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
+# classifier.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
 
-classifier.fit(X, y, batch_size = 64, epochs = 5)
+# classifier.fit(X, y, batch_size = 64, epochs = 5)
 
-classifier.save('ML/symptoms_classifier')
+# classifier.save('ML/symptoms_classifier')
+# classifier.save('symptoms_classifier')
 
 
 def calc_prob(symptoms):
@@ -36,8 +37,8 @@ def calc_prob(symptoms):
         X_test[index] = 1
         
     X_test = X_test.reshape(1,-1)
-    classifier = keras.models.load_model('ML/symptoms_classifier')
-    y_pred = classifier.predict_proba(X_test)
+    classifier = keras.models.load_model('symptoms_classifier')
+    y_pred = classifier.predict(X_test)
     top_five_indexes = y_pred.argsort()[0, :][-5:][::-1]
     top_five = label_encoder.inverse_transform(top_five_indexes)
     probability = y_pred[0, :][top_five_indexes]
