@@ -1,7 +1,7 @@
 import numpy as np
 
-from clusters import other_possible_symptoms
-from classification_algo import calc_prob
+from ML.clusters import other_possible_symptoms
+from ML.classification_algo import calc_prob
 
 main_symptoms_given = []
 print('Hey there, this is Dr. Pulse, your virtual doctor')

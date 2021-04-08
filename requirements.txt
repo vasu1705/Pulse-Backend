@@ -5,3 +5,4 @@ dnspython
 gunicorn
 flask_cors
 tensorflow-cpu
+pandas 

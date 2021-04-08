@@ -1,6 +1,6 @@
 import numpy as np
 
-from clusters import other_possible_symptoms
+from ML.clusters import other_possible_symptoms
 # from classification_algo import calc_prob
 
 def chat(provided):
