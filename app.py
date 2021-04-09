@@ -296,7 +296,7 @@ def get_doctors():
 
 
 
-@app.route('/home/user/cost',methods=["GET"])
+@app.route('/home/user/cost',methods=["GET","POST"])
 @cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
 def calculate_cost():
     costs=list(hospitals.find({},{"_id":0,"Hpt_doctors":0,"Hpt_speciality":0}))
@@ -334,7 +334,7 @@ def calculate_cost():
     return jsonify({'status':200,"filters":temp})
 
 
-@app.route('/home/user/cost/filters',methods=["GET"])
+@app.route('/home/user/cost/filters',methods=["GET","POST"])
 @cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
 
 def calculate_custom_cost():
