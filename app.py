@@ -293,8 +293,95 @@ def get_doctors():
             temp[x['Hpt_id']]=x['Hpt_name']
         # temp.append(hospitals.find_one({"_id":ObjectId(x['Hpt_id'])})['Hpt_name'])
     return jsonify({'doctors':doct,'status':200})
-# *************************************************************** CRUD  Protocols ***************************************************************#
 
+
+
+@app.route('/home/user/cost',methods=["GET"])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
+def calculate_cost():
+    costs=list(hospitals.find({},{"_id":0,"Hpt_doctors":0,"Hpt_speciality":0}))
+    
+    temp=[]
+    distance=[]
+    for x in costs:
+        if x.get("Hpt_fullbody",None)!=None:
+            temp.append(x)
+            temp[-1]['Hpt_fullbody']['total']=0
+            for y in x["Hpt_fullbody"].values():
+                temp[-1]['Hpt_fullbody']['total']+=int(y)
+            temp[-1]['Hpt_fullbody']['total']=str(temp[-1]['Hpt_fullbody']['total'])
+            distance.append(str(temp[-1]['Hpt_location'][0])+', '+str(temp[-1]['Hpt_location'][1])+';')
+
+
+    
+    import requests
+    url1 = "https://trueway-matrix.p.rapidapi.com/CalculateDrivingMatrix"
+
+    querystring = {"origins":"23.237696056902493, 77.40107993996217;","destinations":"23.231859715443527, 77.43622760832372;23.229375249406406, 77.43442516379237"}
+
+    headers = {
+        'x-rapidapi-key': "656a81b00cmshb3d9869868fdb80p1c77b9jsnf810ad716f4e",
+        'x-rapidapi-host': "trueway-matrix.p.rapidapi.com"
+        }
+    querystring["destinations"]=''.join(distance)
+    res=requests.request("GET", url1, headers=headers, params=querystring).json()
+    for j in range(len(temp)):
+        temp[j]['distance']=res["distances"][0][j]
+        temp[j]['durations']=res['durations'][0][j]
+        temp[j].pop("Hpt_cost")
+            
+    
+    return jsonify({'status':200,"fullbody":temp})
+
+
+@app.route('/home/user/cost/filters',methods=["GET"])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
+
+def calculate_custom_cost():
+    content=request.get_json()
+    costs=hospitals.find({},{"_id":0,"Hpt_doctors":0,"Hpt_speciality":0})
+    temp=[]
+    distance=[]
+    for x in costs:
+        ok=True
+        for y in content['filters']:
+            if x['Hpt_cost'].get(y,-1)==-1:
+                ok=False
+                break
+        if ok:
+            temp.append(x)
+            distance.append(str(temp[-1]['Hpt_location'][0])+', '+str(temp[-1]['Hpt_location'][1])+';')
+            temp[-1]['Hpt_cost']['total']=0
+            for y in content['filters']:
+                temp[-1]['Hpt_cost']['total']+=int(temp[-1]['Hpt_cost'][y])
+            temp[-1]['Hpt_cost']['total']=str(temp[-1]['Hpt_cost']['total'])
+
+            
+    print(temp)
+    if len(distance):
+        import requests
+        url1 = "https://trueway-matrix.p.rapidapi.com/CalculateDrivingMatrix"
+
+        querystring = {"origins":"23.237696056902493, 77.40107993996217;","destinations":"23.231859715443527, 77.43622760832372;23.229375249406406, 77.43442516379237"}
+
+        headers = {
+            'x-rapidapi-key': "656a81b00cmshb3d9869868fdb80p1c77b9jsnf810ad716f4e",
+            'x-rapidapi-host': "trueway-matrix.p.rapidapi.com"
+            }
+        querystring["destinations"]=''.join(distance)
+        res=requests.request("GET", url1, headers=headers, params=querystring).json()
+        for j in range(len(temp)):
+            temp[j]['distance']=res["distances"][0][j]
+            temp[j]['durations']=res['durations'][0][j]
+            if temp[j].get('Hpt_fullbody',-1)!=-1:
+                temp[j].pop("Hpt_fullbody")
+
+    return jsonify({"status":200,"filter":temp})
+
+
+
+
+# *************************************************************** CRUD  Protocols ***************************************************************#
 
 
 
