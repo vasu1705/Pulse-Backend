@@ -23,6 +23,7 @@ users=db['Users']
 hospitals=db['Hospitals']
 doctors=db['Doctors']
 Cache=db['Cache']
+pharmacy=db['Pharmacy']
 
 
 # USER defined functions for insertion and deletions from mongodb  #
@@ -107,11 +108,11 @@ def Available():
     content=request.get_json()
     if content==None:
         return jsonify({'status':300,"Message":" NO Data Packet Recived"})
-    hosp_id=content['hospital_id']
+    hosp_id=content['doctor_id']
     rf_id=content['rfid_tag']
-    z=doctors.find_one({"Dr_name":"Ayush Aggarwal"})["status"]
+    z=doctors.find_one({"Dr_id":hosp_id})["status"]
     z="True" if z=="False" else "False"
-    doctors.find_one_and_update({"Dr_name":"Ayush Aggarwal"},{"$set":{"status":z}})
+    doctors.find_one_and_update({"Dr_id":hosp_id},{"$set":{"status":z}})
     if hosp_id==None:
         return jsonify({'status':300,"Message":" NO Data Packet Recived"})
     return jsonify({'status':200,"Message":"Data Packet Recived"})
@@ -282,9 +283,10 @@ def find_hospitals():
 @app.route('/home/user/doctors',methods=["GET"])
 @cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
 def get_doctors():
-    doct=list(doctors.find({'status':"True"},{'_id':0}))
+    doct=list(doctors.find({},{'_id':0}))
     # temp=[hospitals.find_one({"_id":ObjectId(x['Hpt_id'])}) for x in doct]
     temp={}
+    doct.sort(key=lambda x:x['status'],reverse=True)
     for x in doct:
         if temp.get(x['Hpt_id'],-1)!=-1:
             x['Hpt_name']=temp[x['Hpt_id']]
@@ -414,8 +416,11 @@ def calculate_custom_cost():
         return jsonify({"status":200,"filters":temp})
 
 
-
-
+@app.route('/home/user/pharmacy',methods=["GET","POST"])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
+def get_pharmacy():
+    phar=list(pharmacy.find({},{"_id":0}))
+    return jsonify({"pharmacy":phar,"status":200})
 # *************************************************************** CRUD  Protocols ***************************************************************#
 
 
