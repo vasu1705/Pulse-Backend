@@ -109,6 +109,7 @@ def Available():
     if content==None:
         return jsonify({'status':300,"Message":" NO Data Packet Recived"})
     hosp_id=content['doctor_id']
+    print(hosp_id)
     rf_id=content['rfid_tag']
     z=doctors.find_one({"Dr_id":hosp_id})["status"]
     z="True" if z=="False" else "False"
@@ -355,6 +356,7 @@ def calculate_custom_cost():
                 temp[-1]['Hpt_fullbody']['total']=str(temp[-1]['Hpt_fullbody']['total'])
                 distance.append(str(temp[-1]['Hpt_location'][0])+', '+str(temp[-1]['Hpt_location'][1])+';')
                 temp[-1]['Hpt_cost']=temp[-1]['Hpt_fullbody']
+                temp[-1]['Hpt_length']=len(temp[-1]['Hpt_fullbody'])-1
                 
 
         import requests
@@ -392,9 +394,8 @@ def calculate_custom_cost():
                 for y in content['filters']:
                     temp[-1]['Hpt_cost']['total']+=int(temp[-1]['Hpt_cost'][y])
                 temp[-1]['Hpt_cost']['total']=str(temp[-1]['Hpt_cost']['total'])
-
+                temp[-1]['Hpt_length']=len(content['filters'])
                 
-        print(temp)
         if len(distance):
             import requests
             url1 = "https://trueway-matrix.p.rapidapi.com/CalculateDrivingMatrix"
