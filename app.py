@@ -331,7 +331,7 @@ def calculate_cost():
         temp[j].pop("Hpt_cost")
             
     
-    return jsonify({'status':200,"fullbody":temp})
+    return jsonify({'status':200,"filters":temp})
 
 
 @app.route('/home/user/cost/filters',methods=["GET"])
@@ -352,9 +352,9 @@ def calculate_custom_cost():
                     temp[-1]['Hpt_fullbody']['total']+=int(y)
                 temp[-1]['Hpt_fullbody']['total']=str(temp[-1]['Hpt_fullbody']['total'])
                 distance.append(str(temp[-1]['Hpt_location'][0])+', '+str(temp[-1]['Hpt_location'][1])+';')
+                temp[-1]['Hpt_cost']=temp[-1]['Hpt_fullbody']
+                
 
-
-        
         import requests
         url1 = "https://trueway-matrix.p.rapidapi.com/CalculateDrivingMatrix"
 
@@ -369,10 +369,10 @@ def calculate_custom_cost():
         for j in range(len(temp)):
             temp[j]['distance']=res["distances"][0][j]
             temp[j]['durations']=res['durations'][0][j]
-            temp[j].pop("Hpt_cost")
+            temp[j].pop("Hpt_fullbody")
                 
         
-        return jsonify({'status':200,"fullbody":temp})
+        return jsonify({'status':200,"filters":temp})
     else:
         costs=hospitals.find({},{"_id":0,"Hpt_doctors":0,"Hpt_speciality":0})
         temp=[]
@@ -411,7 +411,7 @@ def calculate_custom_cost():
                 if temp[j].get('Hpt_fullbody',-1)!=-1:
                     temp[j].pop("Hpt_fullbody")
 
-        return jsonify({"status":200,"filter":temp})
+        return jsonify({"status":200,"filters":temp})
 
 
 
