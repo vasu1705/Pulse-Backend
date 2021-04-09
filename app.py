@@ -229,41 +229,49 @@ def find_hospitals():
     speciality=None
     if content==None:
         data=list(hospitals.find({},{'_id':0}))
-        data1=hospitals.find_one()
-        print(data1['_id'])
+        for j in range(len(data)):
+            data[j].pop("Hpt_cost")
+            data[j].pop("Hpt_doctors")
         return jsonify({"hospitals":data,"status":200})
 
     elif content.get('speciality',None)!=None :
         i=0
         if content.get('origins',None)!=None:
             querystring["origins"]=str(content['origin_lati'])+', '+str(content['origin_long'])+';'
-        print(querystring)
+        # print(querystring)
         if len(content['speciality'])==0:
+            print("Yes1 ")
             data=list(hospitals.find({},{"_id":0}))
             i=len(data)
         else:
             print("No")
             speciality=content['speciality']
+            print(speciality)
             ids=[str(x.get("Hpt_id")) for x in list(doctors.find({"Dr_type":speciality,"status":"True"}))]
             data=[]
             for x in ids:
                 i+=1
                 data.append(hospitals.find_one({"_id":ObjectId(x)},{"_id":0}))
         distance=[]
-        print(data)
+        # print(data)
+        visit=set()
+        data1=[]
         for x in data:
-            distance.append(str(x['Hpt_location'][0])+', '+str(x['Hpt_location'][1])+';')
-
+            if x['Hpt_id'] not in visit:
+                distance.append(str(x['Hpt_location'][0])+', '+str(x['Hpt_location'][1])+';')
+                visit.add(x['Hpt_id'])
+                data1.append(x)
+        
         querystring["destinations"]=''.join(distance)
         res=requests.request("GET", url1, headers=headers, params=querystring).json()
-        for j in range(i):
-            data[j]['distance']=res["distances"][0][j]
-            data[j]['durations']=res['durations'][0][j]
-            data[j].pop("Hpt_speciality")
-            data[j].pop("Hpt_cost")
-            data[j].pop("Hpt_doctors")
-        print(data)
-        return jsonify({"hospitals":data,"status":200})
+        for j in range(len(data1)):
+            data1[j]['distance']=res["distances"][0][j]
+            data1[j]['durations']=res['durations'][0][j]
+            data1[j].pop("Hpt_speciality")
+            data1[j].pop("Hpt_cost")
+            data1[j].pop("Hpt_doctors")
+        data1.sort(key=lambda x:x['distance'])
+        return jsonify({"hospitals":data1,"status":200})
 
             
     else:
@@ -271,8 +279,24 @@ def find_hospitals():
         return jsonify({"hospitals":data,"status":200})
 
 
-
-
+@app.route('/home/user/doctors',methods=["GET"])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
+def get_doctors():
+    doct=list(doctors.find({'status':"True"},{'_id':0}))
+    # temp=[hospitals.find_one({"_id":ObjectId(x['Hpt_id'])}) for x in doct]
+    temp={}
+    for x in doct:
+        if temp.get(x['Hpt_id'],-1)!=-1:
+            x['Hpt_name']=temp[x['Hpt_id']]
+        else:
+            x['Hpt_name']=hospitals.find_one({"_id":ObjectId(x['Hpt_id'])})['Hpt_name']
+            temp[x['Hpt_id']]=x['Hpt_name']
+        # temp.append(hospitals.find_one({"_id":ObjectId(x['Hpt_id'])})['Hpt_name'])
+    return jsonify({'doctors':doct,'status':200})
 # *************************************************************** CRUD  Protocols ***************************************************************#
+
+
+
+
 if __name__=="__main__":
     app.run()
