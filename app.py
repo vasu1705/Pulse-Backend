@@ -8,6 +8,9 @@ from ML.classification_algo import calc_prob
 import base64
 sys.path.append(os.path.join(sys.path[0]+'/ML'))
 from flask_cors import CORS,cross_origin
+from bson.objectid import ObjectId
+
+
 
 app = Flask(__name__)
 app.config['DEBUG']= True
@@ -19,6 +22,7 @@ db=client.Project1
 users=db['Users']
 hospitals=db['Hospitals']
 doctors=db['Doctors']
+Cache=db['Cache']
 
 
 # USER defined functions for insertion and deletions from mongodb  #
@@ -97,28 +101,44 @@ def logincheck():
 
 
 #      ********************************************* subiasis IOT ******************************************************************************#
-@app.route('/home/extra/dravail',methods=['POST'])
+@app.route('/home/extra/dravail',methods=['POST',"GET"])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
 def Available():
     content=request.get_json()
-   
+    if content==None:
+        return jsonify({'status':300,"Message":" NO Data Packet Recived"})
     hosp_id=content['hospital_id']
     rf_id=content['rfid_tag']
+    z=doctors.find_one({"Dr_name":"Ayush Aggarwal"})["status"]
+    z="True" if z=="False" else "False"
+    doctors.find_one_and_update({"Dr_name":"Ayush Aggarwal"},{"$set":{"status":z}})
     if hosp_id==None:
         return jsonify({'status':300,"Message":" NO Data Packet Recived"})
     return jsonify({'status':200,"Message":"Data Packet Recived"})
 
+
+# *************************************************************** Examine Protocols Prdictions  ***************************************************************#
+import pandas as pd
+pred_desc=pd.read_csv('symptom_description.csv',index_col='Disease')
+pre_pre=pd.read_csv('symptom_precaution.csv',index_col='Disease')   
+
+global current_users
 current_users=defaultdict(list)
-# *************************************************************** Examine Protocols ***************************************************************#
 @app.route('/home/user/Examine',methods=['POST'])
 @cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
+
 def Examine():
     
     content=request.get_json()
-    
+    if Cache.find_one({'cache':"current_users"})!=None:
+        print("Cache found")
+        current_users=Cache.find_one({'cache':"current_users"})['data']
+        if len(current_users)==0:
+             current_users=defaultdict(list)
+    else:
+        current_users=defaultdict(list)
     user=content['username']
     content.pop('username')
-    print(content)
-    print(current_users)
     if current_users.get(user,None)==None:
         current_users[user]=[[],[],[],False]
         # cureent_user[user][0] -> symtoms input total
@@ -134,6 +154,11 @@ def Examine():
         for x in current_users[user][1][:5]:
             ret_json["symptoms"].append(x)
         current_users[user][1]=current_users[user][1][5:]
+        if Cache.find_one({'cache':"current_users"})==None:
+            Cache.insert_one({"cache":"current_users","data":current_users})
+        else:
+            Cache.update_one({"cache":"current_users"},{ "$set": { "data": current_users  }})
+
         return jsonify(ret_json)
     else:
         if len(current_users[user][1])>10:
@@ -142,6 +167,8 @@ def Examine():
             for x in current_users[user][1][:5]:
                 ret_json["symptoms"].append(x)
             current_users[user][1]=current_users[user][1][5:]
+            Cache.update_one({"cache":"current_users"},{ "$set": { "data": current_users  }})
+
             return jsonify(ret_json)
         else:
             if current_users[user][3]==False:
@@ -150,6 +177,8 @@ def Examine():
                 current_users[user][0] = list(set(current_users[user][1]) & set(other_possible_symptoms(current_users[user][0])))
                 if current_users[user][1]:
                     ret_json={"status":200,"symptoms":[current_users[user][1][0]]}
+                    Cache.update_one({"cache":"current_users"},{ "$set": { "data": current_users  }})
+
                     return ret_json
             else:
                 
@@ -160,32 +189,102 @@ def Examine():
                     current_users[user][1].pop(0)
                 if current_users[user][1]:
                     ret_json={"status":200,"symptoms":[current_users[user][1][0]]}
+                    Cache.update_one({"cache":"current_users"},{ "$set": { "data": current_users  }})
                     return ret_json
             ret_json={}
             predicted_diseases, probabilities = calc_prob(current_users[user][2])
             print(predicted_diseases, probabilities)
+
             ret_json={'predicted_diseases':predicted_diseases.tolist(),'probabilities':probabilities.tolist(),'status':200}
+            ret_json['description']=(pred_desc.loc[predicted_diseases[0]]).tolist()
+            ret_json['description']=ret_json['description'][0]
+            ret_json['precautions']=(pre_pre.loc[predicted_diseases[0]]).tolist()
             current_users.pop(user)
+            Cache.update_one({"cache":"current_users"},{ "$set": { "data": current_users  }})
             return jsonify(ret_json)
 
 
-# @app.route('/home/user/Examine/Ques',methods=['POST'])
-# @cross_origin()
-# def Question():
-#     content=request.get_json()
-#     user=content['username']
-#     content.pop('username')
-#     # Answer of the Question return is nessasary 
-
-#     answer=content['answer']
-    # if answer== True:
-    #     current_users[user][2].append(current_users[user][1][0])
-    #     current_users[user][1] = list(set(current_users[user][1]) & set(other_possible_symptoms([current_users[user][1].pop(0)])))
-    # else:
-    #     current_users[user][1].pop(0)
-#     return jsonify({"status":200,"Message":"Query was Successful","Type":"Question_Answer"})
-
 
 # *************************************************************** Examine Protocols ***************************************************************#
+# ****************************                  **************** CRUD  Protocols *****************                            *********************#
+
+
+@app.route('/home/user/hospitals',methods=["POST","GET"])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
+def find_hospitals():
+    import requests
+    url1 = "https://trueway-matrix.p.rapidapi.com/CalculateDrivingMatrix"
+
+    querystring = {"origins":"23.237696056902493, 77.40107993996217;","destinations":"23.231859715443527, 77.43622760832372;23.229375249406406, 77.43442516379237"}
+
+    headers = {
+        'x-rapidapi-key': "656a81b00cmshb3d9869868fdb80p1c77b9jsnf810ad716f4e",
+        'x-rapidapi-host': "trueway-matrix.p.rapidapi.com"
+        }
+    # response = requests.request("GET", url1, headers=headers, params=querystring)
+
+    # print(response.text)
+    content=request.get_json()
+    querystring["origins"]=str(content['origin_lati'])+', '+str(content['origin_long'])+';'
+    print(querystring)
+    speciality=None
+    if content==None:
+        data=list(hospitals.find({},{'_id':0}))
+        data1=hospitals.find_one()
+        print(data1['_id'])
+        return jsonify({"hospitals":data,"status":200})
+
+    elif content.get('speciality',None)!=None :
+        # if len(content['speciality'])==0:
+        #     data=list(hospitals.find({},{'_id':0}))
+        #     return jsonify({"hospitals":data,"status":200})
+        # speciality=content['speciality']
+        # ids=[str(x.get("Hpt_id")) for x in list(doctors.find({"Dr_type":speciality,"status":"True"}))]
+        # data=[]
+        # for x in ids:
+        #     data.append(hospitals.find_one({"_id":ObjectId(x)},{"_id":0}))
+        # i=0
+        # distance=[]
+        # for x in data:
+        #     distance.append(str(x['Hpt_location'][0])+', '+str(x['Hpt_location'][1])+';')
+        #     i+=1
+        i=0
+
+        if len(content['speciality'])==0:
+            data=list(hospitals.find({},{"_id":0}))
+            data=data[:2]
+            i=len(data)
+        else:
+            print("No")
+            speciality=content['speciality']
+            ids=[str(x.get("Hpt_id")) for x in list(doctors.find({"Dr_type":speciality,"status":"True"}))]
+            data=[]
+            for x in ids:
+                i+=1
+                data.append(hospitals.find_one({"_id":ObjectId(x)},{"_id":0}))
+        distance=[]
+        for x in data:
+            distance.append(str(x['Hpt_location'][0])+', '+str(x['Hpt_location'][1])+';')
+
+        querystring["destinations"]=''.join(distance)
+        res=requests.request("GET", url1, headers=headers, params=querystring).json()
+        for j in range(i):
+            data[j]['distance']=res["distances"][0][j]
+            data[j]['durations']=res['durations'][0][j]
+            data[j].pop("Hpt_speciality")
+            data[j].pop("Hpt_cost")
+        print(data)
+        return jsonify({"hospitals":data,"status":200})
+        # return jsonify({"status":200})
+
+            
+    else:
+        data=list(hospitals.find({'_id':0}))
+        return jsonify({"hospitals":data,"status":200})
+
+
+
+
+# *************************************************************** CRUD  Protocols ***************************************************************#
 if __name__=="__main__":
     app.run()
