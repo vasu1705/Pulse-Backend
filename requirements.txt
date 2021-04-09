@@ -7,3 +7,4 @@ flask_cors
 tensorflow-cpu
 pandas 
 scikit-learn
+flask_cors

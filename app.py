@@ -225,8 +225,7 @@ def find_hospitals():
 
     # print(response.text)
     content=request.get_json()
-    querystring["origins"]=str(content['origin_lati'])+', '+str(content['origin_long'])+';'
-    print(querystring)
+    
     speciality=None
     if content==None:
         data=list(hospitals.find({},{'_id':0}))
@@ -235,24 +234,12 @@ def find_hospitals():
         return jsonify({"hospitals":data,"status":200})
 
     elif content.get('speciality',None)!=None :
-        # if len(content['speciality'])==0:
-        #     data=list(hospitals.find({},{'_id':0}))
-        #     return jsonify({"hospitals":data,"status":200})
-        # speciality=content['speciality']
-        # ids=[str(x.get("Hpt_id")) for x in list(doctors.find({"Dr_type":speciality,"status":"True"}))]
-        # data=[]
-        # for x in ids:
-        #     data.append(hospitals.find_one({"_id":ObjectId(x)},{"_id":0}))
-        # i=0
-        # distance=[]
-        # for x in data:
-        #     distance.append(str(x['Hpt_location'][0])+', '+str(x['Hpt_location'][1])+';')
-        #     i+=1
         i=0
-
+        if content.get('origins',None)!=None:
+            querystring["origins"]=str(content['origin_lati'])+', '+str(content['origin_long'])+';'
+        print(querystring)
         if len(content['speciality'])==0:
             data=list(hospitals.find({},{"_id":0}))
-            data=data[:2]
             i=len(data)
         else:
             print("No")
@@ -263,6 +250,7 @@ def find_hospitals():
                 i+=1
                 data.append(hospitals.find_one({"_id":ObjectId(x)},{"_id":0}))
         distance=[]
+        print(data)
         for x in data:
             distance.append(str(x['Hpt_location'][0])+', '+str(x['Hpt_location'][1])+';')
 
@@ -273,9 +261,9 @@ def find_hospitals():
             data[j]['durations']=res['durations'][0][j]
             data[j].pop("Hpt_speciality")
             data[j].pop("Hpt_cost")
+            data[j].pop("Hpt_doctors")
         print(data)
         return jsonify({"hospitals":data,"status":200})
-        # return jsonify({"status":200})
 
             
     else:
