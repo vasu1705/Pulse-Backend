@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-dataset = pd.read_csv('ML/Training.csv')
+dataset = pd.read_csv('ML/Train_unique.csv')
 X = dataset.iloc[:, :-1].values
 y = dataset.iloc[:, -1].values
 
