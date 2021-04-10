@@ -220,7 +220,7 @@ def find_hospitals():
     querystring = {"origins":"23.237696056902493, 77.40107993996217;","destinations":"23.231859715443527, 77.43622760832372;23.229375249406406, 77.43442516379237"}
 
     headers = {
-        'x-rapidapi-key': "784373bb10mshfcf10804e7ad65ap1cd6edjsn8c98728a888d",
+        'x-rapidapi-key': "327f8a6b06msh8f77c136d8ca000p1f6dbajsn966200f786c5",
         'x-rapidapi-host': "trueway-matrix.p.rapidapi.com"
         }
     # response = requests.request("GET", url1, headers=headers, params=querystring)
@@ -323,7 +323,7 @@ def calculate_cost():
     querystring = {"origins":"23.237696056902493, 77.40107993996217;","destinations":"23.231859715443527, 77.43622760832372;23.229375249406406, 77.43442516379237"}
 
     headers = {
-        'x-rapidapi-key': "784373bb10mshfcf10804e7ad65ap1cd6edjsn8c98728a888d",
+        'x-rapidapi-key': "327f8a6b06msh8f77c136d8ca000p1f6dbajsn966200f786c5",
         'x-rapidapi-host': "trueway-matrix.p.rapidapi.com"
         }
     querystring["destinations"]=''.join(distance)
@@ -365,7 +365,7 @@ def calculate_custom_cost():
         querystring = {"origins":"23.237696056902493, 77.40107993996217;","destinations":"23.231859715443527, 77.43622760832372;23.229375249406406, 77.43442516379237"}
 
         headers = {
-            'x-rapidapi-key': "784373bb10mshfcf10804e7ad65ap1cd6edjsn8c98728a888d",
+            'x-rapidapi-key': "327f8a6b06msh8f77c136d8ca000p1f6dbajsn966200f786c5",
             'x-rapidapi-host': "trueway-matrix.p.rapidapi.com"
             }
         querystring["destinations"]=''.join(distance)
@@ -403,7 +403,7 @@ def calculate_custom_cost():
             querystring = {"origins":"23.237696056902493, 77.40107993996217;","destinations":"23.231859715443527, 77.43622760832372;23.229375249406406, 77.43442516379237"}
 
             headers = {
-                'x-rapidapi-key': "784373bb10mshfcf10804e7ad65ap1cd6edjsn8c98728a888d",
+                'x-rapidapi-key': "327f8a6b06msh8f77c136d8ca000p1f6dbajsn966200f786c5",
                 'x-rapidapi-host': "trueway-matrix.p.rapidapi.com"
                 }
             querystring["destinations"]=''.join(distance)
