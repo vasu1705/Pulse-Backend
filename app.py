@@ -163,7 +163,7 @@ def Examine():
 
         return jsonify(ret_json)
     else:
-        if len(current_users[user][1])>10:
+        if len(current_users[user][1])>20:
             current_users[user][0].extend(content['symptoms'])
             ret_json={"status":200,"symptoms":[]}
             for x in current_users[user][1][:5]:
